@@ -78,7 +78,9 @@ const LoginPage = () => {
         </h1>
         <div className="login-box">
           <h2>Welcome Back!</h2>
-          <p style={{ marginBottom: "25px" }}>
+          <p
+            style={{ marginBottom: "25px", color: "black", fontSize: "1.1rem" }}
+          >
             Log in to your account to continue.
           </p>
           <form onSubmit={handleSubmit} className="login-form">
