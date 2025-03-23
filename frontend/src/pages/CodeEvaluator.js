@@ -44,6 +44,56 @@ const languageExtensions = {
   cpp: cpp(),
 };
 
+
+// editted for auto langauge detection
+const detectLanguage = (code) => {
+  const trimmedCode = code.trim();
+  if (
+    /#include\s*<.*?>/.test(trimmedCode) ||
+    /\busing\s+namespace\s+std;/.test(trimmedCode) ||
+    /\bint\s+main\s*\(/.test(trimmedCode) ||
+    /\bcout\s*<<\s*".*?"/.test(trimmedCode) ||
+    /std::/.test(trimmedCode)
+  ) {
+    return "cpp";
+  }
+
+  if (
+    /\bpublic\s+class\b/.test(trimmedCode) ||
+    /\bimport\s+java\./.test(trimmedCode) ||
+    /\bSystem\.out\.println\(/.test(trimmedCode) ||
+    /\bpublic\s+(static\s+)?void\s+main\s*\(/.test(trimmedCode) ||
+    /@\w+/.test(trimmedCode)
+  ) {
+    return "java";
+  }
+
+  if (
+    /(^|\s)def\s+\w+\s*\(/.test(trimmedCode) ||
+    /(^|\s)class\s+\w+\s*(:|\()/i.test(trimmedCode) ||
+    /^\s*(import|from)\s+\w+/.test(trimmedCode) ||
+    /print\s*\(.+?\)/.test(trimmedCode) ||
+    /\bif\s+__name__\s*==\s*['"]__main__['"]/.test(trimmedCode)
+  ) {
+    return "python";
+  }
+
+  if (
+    /\b(console\.log|alert|document\.querySelector|window\.addEventListener)\(/.test(
+      trimmedCode
+    ) ||
+    /\b(const|let|var)\s+\w+\s*=/.test(trimmedCode) ||
+    /\bfunction\s+\w+\s*\(/.test(trimmedCode) ||
+    /\basync\s+function\s+\w+\s*\(/.test(trimmedCode) ||
+    /\bexport\s+(default\s+)?\w+/.test(trimmedCode) ||
+    /\bimport\s+[\w{}\s,*]+\s+from\s+['"].+['"];/.test(trimmedCode)
+  ) {
+    return "javascript";
+  }
+
+  return "";
+};
+
 const CodeEvaluator = () => {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,14 +115,6 @@ const CodeEvaluator = () => {
       setAlertOpen(true);
       return;
     }
-
-    if (!language) {
-      setAlertMessage("Please select a language first!");
-      setAlertSeverity("warning");
-      setAlertOpen(true);
-      return;
-    }
-
     setLoading(true);
     setAnalysisResult(null);
 
@@ -142,10 +184,14 @@ const CodeEvaluator = () => {
     setCode("");
     setAnalysisResult(null);
   };
-
-  const handleCodeChange = (value) => {
+  
+// editted for auto langauge detection
+    const handleCodeChange = (value) => {
+    const detectedLanguage = detectLanguage(value);
+    setLanguage(detectedLanguage);
     setCode(value);
-  };
+    };
+
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -164,6 +210,22 @@ const CodeEvaluator = () => {
 
   return (
     <div className={`container ${darkMode ? "dark-theme" : "light-theme"}`}>
+  // ediited for auto language detection
+   <div className="language-display">
+        {language ? (
+          `Detected language: ${
+            language === "cpp"
+              ? "C++"
+              : language.charAt(0).toUpperCase() + language.slice(1)
+          }`
+        ) : (
+          <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <CircularProgress size={18} style={{color: "beige"}} />
+            Detecting Language...
+          </span>
+        )}
+      </div>
+      
       <div className="theme-toggle">
         <FaSun className={`theme-icon ${!darkMode ? "rotate" : ""}`} />
         <Switch
