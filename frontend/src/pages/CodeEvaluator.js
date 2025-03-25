@@ -146,6 +146,7 @@ const CodeEvaluator = () => {
   const handleCodeChange = (value) => {
     setCode(value);
   };
+  
 
   // Keyboard shortcuts
   useEffect(() => {
